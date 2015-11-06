@@ -14,20 +14,35 @@ from time import sleep
 import requests
 from lxml import etree
 
+
+
+
+
 class IMF(Fetcher):
-    def __init__(self):
-        super().__init__(provider_name='IMF') 
+    def __init__(self, db=None, es_client=None):
+        super().__init__(provider_name='IMF',  db=db, es_client=es_client) 
         self.provider_name = 'IMF'
-        self.provider = Provider(name=self.provider_name,website='http://www.imf.org/')
-        
+        self.provider = Providers(name=self.provider_name,
+                          long_name=' International Monetary Fund ',
+                          region='World',
+                          website='http://www.imf.org/',
+                          fetcher=self)
     def upsert_dataset(self, datasetCode):
         if datasetCode=='WEO':
             for u in self.weo_urls:
                 self.upsert_weo_issue(u,datasetCode)
-            es = ElasticIndex()                                 # ????
-            es.make_index(self.provider_name,datasetCode)       # ????
+                self.update_metas(datasetCode)
         else:
-            raise Exception("This dataset is unknown" + dataCode)
+            if datasetCode=='IFS': 
+                u = 'http://data.imf.org/ifs'
+                self.upsert_ifs_issue(u,datasetCode)
+                self.update_metas(datasetCode)
+                      
+        
+        
+        
+        #else:
+           # raise Exception("This dataset is unknown" + dataCode)
 
     @property
     def weo_urls(self):
@@ -68,7 +83,8 @@ class IMF(Fetcher):
         return(sorted(output))
         
     def upsert_weo_issue(self,url,dataset_code):
-        dataset = Dataset(self.provider_name,dataset_code)
+        dataset = Datasets(self.provider_name,dataset_code,
+                           fetcher=self)
         weo_data = WeoData(dataset,url)
         dataset.name = 'World Economic Outlook'
         dataset.doc_href = 'http://www.imf.org/external/ns/cs.aspx?id=28'
@@ -77,12 +93,79 @@ class IMF(Fetcher):
         dataset.series.data_iterator = weo_data
         dataset.update_database()
 
+    def upsert_ifs_issue(self,url,dataset_code):
+        dataset = Datasets(self.provider_name,dataset_code,
+                           fetcher=self)
+        ifs_data = IfsData(dataset,url)
+        dataset.name = 'International Financial Statistics'
+        dataset.doc_href = 'http://data.imf.org/ifs'
+        dataset.last_update = ifs_data.release_date
+        dataset.series.data_iterator = ifs_data
+        dataset.update_database()    
+   
     def upsert_categories(self):
-        document = Category(provider = self.provider_name, 
+        document = Categories(provider = self.provider_name, 
                             name = 'WEO' , 
                             categoryCode ='WEO',
-                            exposed = True)
+                            children = None,
+                            fetcher=self)
         return document.update_database()
+
+
+class IfsData():
+    def __init__(self,dataset,url):
+        self.provider_name = dataset.provider_name
+        self.dataset_code = dataset.dataset_code
+        self.dimension_list = dataset.dimension_list
+        self.attribute_list = dataset.attribute_list
+        #datafile = urllib.request.urlopen(url).read().decode('latin-1').splitlines()
+        self.list_series = []
+        with open('/home/salimeh/Downloads/tmp.csv') as csvfile:
+            self.sheet_ = csv.DictReader(csvfile)
+            for row in self.sheet_ :
+                self.list_series.append(row)
+        self.row_range = iter(range(len(self.list_series)))        
+        #self.sheet = csv.DictReader(datafile, delimiter='\t')        
+        self.release_date = datetime.strptime("06/11/15", "%d/%m/%y")
+
+    def __next__(self):
+        row = self.list_series[next(self.row_range)]
+        #row = next(self.sheet) 
+        series = self.build_series(row)
+        if series is None:
+            raise StopIteration()            
+        return(series)
+        
+    def build_series(self,row):
+        if row['\ufeff"Country Name"']:               
+            series = {}
+            values = []
+            dimensions = {}
+            start_date = pandas.Period(row['Time Period'],freq='annual')
+            end_date = pandas.Period(row['Time Period'],freq='annual')
+            values = row['Value']
+            dimensions['Country'] = self.dimension_list.update_entry('Country', row['Country Code'], row['\ufeff"Country Name"'])
+            dimensions['Indicator'] = self.dimension_list.update_entry('Indicator', row['Indicator Code'], row['Indicator Name'])
+            dimensions['Status'] = self.dimension_list.update_entry('Status', '', row['Status'])
+            series_name = row['Indicator Name']+'.'+row['\ufeff"Country Name"']
+            series_key = row['Indicator Code']
+            #release_dates = [ self.release_date for v in values]
+            series['provider'] = self.provider_name
+            series['datasetCode'] = self.dataset_code
+            series['name'] = series_name
+            series['key'] = series_key
+            series['values'] = [values]
+            series['attributes'] = {}
+            series['dimensions'] = dimensions
+            series['lastUpdate'] = self.release_date
+            #series['releaseDates'] = release_dates
+            series['startDate'] = start_date.ordinal
+            series['endDate'] = end_date.ordinal
+            series['frequency'] = 'A'
+            return(series)
+        else:
+            return None    
+
         
 class WeoData():
     def __init__(self,dataset,url):
@@ -119,7 +202,7 @@ class WeoData():
             dimensions['Scale'] = self.dimension_list.update_entry('Scale', row['Scale'], row['Scale'])
             series_name = row['Subject Descriptor']+'.'+row['Country']+'.'+row['Units']
             series_key = row['WEO Subject Code']+'.'+row['ISO']+'.'+dimensions['Units']
-            release_dates = [ self.release_date for v in values]
+            #release_dates = [ self.release_date for v in values]
             series['provider'] = self.provider_name
             series['datasetCode'] = self.dataset_code
             series['name'] = series_name
@@ -130,7 +213,8 @@ class WeoData():
                 estimation_start = int(row['Estimates Start After']);
                 series['attributes'] = {'flag': [ '' if int(y) < estimation_start else 'e' for y in self.years]}
             series['dimensions'] = dimensions
-            series['releaseDates'] = release_dates
+            series['lastUpdate'] = self.release_date
+            #series['releaseDates'] = release_dates
             series['startDate'] = self.start_date.ordinal
             series['endDate'] = self.end_date.ordinal
             series['frequency'] = 'A'
@@ -147,6 +231,7 @@ if __name__ == "__main__":
     w.provider.update_database()
     w.upsert_categories()
     w.upsert_dataset('WEO') 
+    w.upsert_dataset('IFS') 
 
 
               
