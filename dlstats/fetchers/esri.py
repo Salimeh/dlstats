@@ -59,7 +59,7 @@ class Esri(Fetcher):
         document = Categories(provider = self.provider_name, 
                             name = 'esri', 
                             categoryCode ='esri',
-                            children = [None],
+                            children = None,
                             fetcher=self )
         return document.update_database()
         
@@ -94,14 +94,30 @@ class EsriData():
         releaseDate = response.info()['Last-Modified'] 
         self.releaseDate = datetime.strptime(releaseDate, 
                                                       "%a, %d %b %Y %H:%M:%S GMT")                                                  
- 
-        if self.panda_csv.icol(0)[6] == '4' :
+        self.url = url 
+
+
+        Column1_value = list(self.panda_csv.icol(1))
+        if self.panda_csv.icol(0)[6][5] == '4' or self.panda_csv.icol(0)[6][5] == '1' :  
+            ind = -1
             self.frequency = 'A'
-            ind = -1 
-        else :
-            self.frequency = 'Q'
+        else:
             ind = -4
-        end_date = self.panda_csv.icol(0)[len(self.panda_csv.icol(0))+ind][:4]
+            self.frequency = 'Q'
+        for index_, value in reversed(list(enumerate(Column1_value))):
+            if str(value) != "nan" :
+                index = index_
+                break
+        Column0_year=list(self.panda_csv.icol(0))
+        if self.frequency == 'A' :
+            end_date = Column0_year[index][:4]
+    
+        if self.frequency == 'Q' : 
+            for ind_temp in range(index) :
+                if len(Column0_year[index-ind_temp]) > 7 :
+                    indexQ = index-ind_temp
+                    break
+            end_date = Column0_year[indexQ][:4]       
         start_date = self.panda_csv.icol(0)[6][:4]
         self.end_date = pandas.Period(end_date,freq = self.frequency).ordinal    
         self.start_date = pandas.Period(start_date,freq = self.frequency).ordinal
@@ -145,8 +161,9 @@ class EsriData():
         series = {}
         series_value = []       
         series_name = str(column[3])+'_ ' + self.frequency +'_ ' +self.currency
-        series_key = 'esri.' + str(column[3]) + '; ' + self.frequency
-        print(column[3])
+        series_key = 'esri.' + str(column[3]) + '; ' + self.frequency+ '_' + self.dataset_code
+        #print( series_key)
+  
         dimensions['concept'] = self.dimension_list.update_entry('concept','',str(column[3]))
         #print(dimensions['concept'])
         for r in range(6, len(column)):
