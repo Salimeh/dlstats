@@ -96,7 +96,7 @@ class IMF(Fetcher):
     def upsert_ifs_issue(self,url,dataset_code):
         dataset = Datasets(self.provider_name,dataset_code,
                            fetcher=self)
-        ifs_data = IfsData(dataset,url)
+        ifs_data = Ifs_Data(dataset,url)
         dataset.name = 'International Financial Statistics'
         dataset.doc_href = 'http://data.imf.org/ifs'
         dataset.last_update = ifs_data.release_date
@@ -112,24 +112,67 @@ class IMF(Fetcher):
         return document.update_database()
 
 
-class IfsData():
+
+
+
+class IFS_Data():
     def __init__(self,dataset,url):
         self.provider_name = dataset.provider_name
         self.dataset_code = dataset.dataset_code
         self.dimension_list = dataset.dimension_list
         self.attribute_list = dataset.attribute_list
-        #datafile = urllib.request.urlopen(url).read().decode('latin-1').splitlines()
-        self.list_series = []
-        with open('/home/salimeh/Downloads/tmp.csv') as csvfile:
-            self.sheet_ = csv.DictReader(csvfile)
-            for row in self.sheet_ :
-                self.list_series.append(row)
-        self.row_range = iter(range(len(self.list_series)))        
-        #self.sheet = csv.DictReader(datafile, delimiter='\t')        
+        self.list_keys = []
+        self.original_data = {}
+        self.country_list= {}
+        self.indicatore_list= {}
+    def load_original_data(self):        
+        with open('/home/salimeh/IFS/IFS_10-20-2015 20-09-38-08.csv') as csvfile:
+            reader = csv.DictReader(csvfile)
+            for row in reader :
+                self.frequency = 'A'
+                plus_fre = 23    # Default base year in pandas.period is 1970, 1970-1947=23
+                if 'Q' in row["Time Period"]:
+                    self.frequency = 'Q'
+                    plus_fre = 23*4
+                if 'M' in row["Time Period"]: 
+                    self.frequency = 'M' 
+                    plus_fre = 23*12
+                self.key = row["Indicator Code"]+'.'+row["Country Code"] +'.'+ self.frequency 
+                if self.key in self.original_data.keys():
+                    self.original_data[self.key]["Country Code"] = row["Country Code"]
+                    self.original_data[self.key]["Indicator Code"] = row["Indicator Code"]
+                    self.original_data[self.key]["frequency"] =self.frequency
+                    self.original_data[self.key]["values"][pandas.Period(row["Time Period"].replace('M', '-'),self.frequency).ordinal+plus_fre-1] = row["Value"]
+                    self.original_data[self.key]["Status"][pandas.Period(row["Time Period"].replace('M', '-'),self.frequency).ordinal+plus_fre-1] = row["Status"]    
+                else:
+                    self.original_data[self.key] = {}
+                    self.original_data[self.key]["values"] =  ["na" for i in range(2015-1947)]
+                    self.original_data[self.key]["Status"] =  ["na" for i in range(2015-1947)]
+                    if self.frequency == 'M':                 
+                        self.original_data[self.key]["values"] =  ["na" for i in range(12*(2016-1947))] # there is 2015M6 ..
+                        self.original_data[self.key]["Status"] =  ["na" for i in range(12*(2016-1947))]
+                    if self.frequency == 'Q':
+                        self.original_data[self.key]["values"] =  ["na" for i in range(4*(2016-1947))]  # there is 2015Q1 ..
+                        self.original_data[self.key]["Status"] =  ["na" for i in range(4*(2016-1947))]
+                    self.original_data[self.key]["Country Code"] = row["Country Code"]
+                    self.original_data[self.key]["Indicator Code"] = row["Indicator Code"]
+                    self.original_data[self.key]["frequency"] =self.frequency
+                    self.original_data[self.key]["values"][pandas.Period(row["Time Period"].replace('M', '-'),self.frequency).ordinal+plus_fre-1] = row["Value"]
+                    self.original_data[self.key]["Status"][pandas.Period(row["Time Period"].replace('M', '-'),self.frequency).ordinal+plus_fre-1] = row["Status"]
+                if row["Country Code"] in self.country_list.keys():
+                    pass
+                else:
+                    self.country_list[row["Country Code"]] =  row['\ufeff"Country Name"']               
+                if row["Indicator Code"] in self.indicatore_list.keys():
+                    pass
+                else:    
+                    self.indicatore_list[row["Indicator Code"]] = row["Indicator Name"]   
+        self.row_range = iter(range(len(self.original_data.keys())))        
+        self.list_keys = list( self.original_data.keys())     
         self.release_date = datetime.strptime("06/11/15", "%d/%m/%y")
 
     def __next__(self):
-        row = self.list_series[next(self.row_range)]
+        row = self.original_data[self.list_keys[next(self.row_range)]]
         #row = next(self.sheet) 
         series = self.build_series(row)
         if series is None:
@@ -141,8 +184,8 @@ class IfsData():
             series = {}
             values = []
             dimensions = {}
-            start_date = pandas.Period(row['Time Period'],freq='annual')
-            end_date = pandas.Period(row['Time Period'],freq='annual')
+            start_date = pandas.Period('1947',self.frequency)
+            end_date = pandas.Period('2015',self.frequency)
             values = row['Value']
             dimensions['Country'] = self.dimension_list.update_entry('Country', row['Country Code'], row['\ufeff"Country Name"'])
             dimensions['Indicator'] = self.dimension_list.update_entry('Indicator', row['Indicator Code'], row['Indicator Name'])
