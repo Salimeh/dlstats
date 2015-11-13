@@ -21,11 +21,12 @@ class IFS_Data():
         self.indicatore_list= {}
     def load_original_data(self):
         
-        with open('/home/salimeh/IFS/tmp.csv') as csvfile:
+        with open('/home/salimeh/IFS/IFS_300.csv') as csvfile:
             reader = csv.DictReader(csvfile)
 
             for row in reader :
                 print(row)
+                
                 self.frequency = 'A'
                 if 'Q' in row["Time Period"]:
                     self.frequency = 'Q'
