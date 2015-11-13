@@ -13,10 +13,6 @@ import pandas
 class IFS_Data():
     def __init__(self):
         self.original_data = {}
-        self.d = []
-        self.key_all= []
-        self.red = []
-        self.attempt = {}
         self.country_list= {}
         self.indicatore_list= {}
     def load_original_data(self):
@@ -25,7 +21,7 @@ class IFS_Data():
             reader = csv.DictReader(csvfile)
             for row in reader :
                 self.frequency = 'A'
-                plus_fre = 23 # Default base year in pandas.period is 1970, 1970-1947=23
+                plus_fre = 23    # Default base year in pandas.period is 1970, 1970-1947=23
                 if 'Q' in row["Time Period"]:
                     self.frequency = 'Q'
                     plus_fre = 23*4
@@ -33,33 +29,30 @@ class IFS_Data():
                     self.frequency = 'M' 
                     plus_fre = 23*12
                 self.key = row["Indicator Code"]+'.'+row["Country Code"] +'.'+ self.frequency 
-                if self.key in self.attempt.keys():
+                if self.key in self.original_data.keys():
 
-                    self.attempt[self.key]["Country Code"] = row["Country Code"]
-                    self.attempt[self.key]["Indicator Code"] = row["Indicator Code"]
-                    self.attempt[self.key]["frequency"] =self.frequency
-                    self.attempt[self.key]["values"][pandas.Period(row["Time Period"].replace('M', '-'),self.frequency).ordinal+plus_fre] = row["Value"]
-                    self.attempt[self.key]["Status"][pandas.Period(row["Time Period"].replace('M', '-'),self.frequency).ordinal+plus_fre] = row["Status"]
+                    self.original_data[self.key]["Country Code"] = row["Country Code"]
+                    self.original_data[self.key]["Indicator Code"] = row["Indicator Code"]
+                    self.original_data[self.key]["frequency"] =self.frequency
+                    self.original_data[self.key]["values"][pandas.Period(row["Time Period"].replace('M', '-'),self.frequency).ordinal+plus_fre-1] = row["Value"]
+                    self.original_data[self.key]["Status"][pandas.Period(row["Time Period"].replace('M', '-'),self.frequency).ordinal+plus_fre-1] = row["Status"]
                 
                 else:
-                    self.attempt[self.key] = {}
-                    self.attempt[self.key]["values"] =  ["na" for i in range(2015-1947)]
-                    self.attempt[self.key]["Status"] =  ["na" for i in range(2015-1947)]
+                    self.original_data[self.key] = {}
+                    self.original_data[self.key]["values"] =  ["na" for i in range(2015-1947)]
+                    self.original_data[self.key]["Status"] =  ["na" for i in range(2015-1947)]
                     if self.frequency == 'M':                 
-                        self.attempt[self.key]["values"] =  ["na" for i in range(12*(2015-1947))]
-                        self.attempt[self.key]["Status"] =  ["na" for i in range(12*(2015-1947))]
+                        self.original_data[self.key]["values"] =  ["na" for i in range(12*(2015-1947))]
+                        self.original_data[self.key]["Status"] =  ["na" for i in range(12*(2015-1947))]
                     if self.frequency == 'Q':
-                        self.attempt[self.key]["values"] =  ["na" for i in range(4*(2015-1947))]
-                        self.attempt[self.key]["Status"] =  ["na" for i in range(4*(2015-1947))]
+                        self.original_data[self.key]["values"] =  ["na" for i in range(4*(2015-1947))]
+                        self.original_data[self.key]["Status"] =  ["na" for i in range(4*(2015-1947))]
                         
-                    self.attempt[self.key]["Country Code"] = row["Country Code"]
-                    self.attempt[self.key]["Indicator Code"] = row["Indicator Code"]
-                    self.attempt[self.key]["frequency"] =self.frequency
-                    #print(self.attempt[self.key]["values"])
-                    #print(self.frequency)
-                    #print(pandas.Period(row["Time Period"],self.frequency).ordinal+23+1947)
-                    self.attempt[self.key]["values"][pandas.Period(row["Time Period"].replace('M', '-'),self.frequency).ordinal+plus_fre] = row["Value"]
-                    self.attempt[self.key]["Status"][pandas.Period(row["Time Period"].replace('M', '-'),self.frequency).ordinal+plus_fre] = row["Status"]
+                    self.original_data[self.key]["Country Code"] = row["Country Code"]
+                    self.original_data[self.key]["Indicator Code"] = row["Indicator Code"]
+                    self.original_data[self.key]["frequency"] =self.frequency
+                    self.original_data[self.key]["values"][pandas.Period(row["Time Period"].replace('M', '-'),self.frequency).ordinal+plus_fre-1] = row["Value"]
+                    self.original_data[self.key]["Status"][pandas.Period(row["Time Period"].replace('M', '-'),self.frequency).ordinal+plus_fre-1] = row["Status"]
                 if row["Country Code"] in self.country_list.keys():
                     pass
                 else:
@@ -74,7 +67,7 @@ class IFS_Data():
 
         
 
-        return(self.attempt)
+        return(self.original_data)
 if __name__ == "__main__":
     w = IFS_Data()
     ee= w.load_original_data()
