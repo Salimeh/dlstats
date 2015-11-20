@@ -18,6 +18,7 @@ import io
 class BEA(Fetcher):
     def __init__(self, db=None, es_client=None):
         super().__init__(provider_name='BEA',  db=db, es_client=es_client) 
+        self.list_sheet = []
         self.provider_name = 'BEA'
         self.provider = Providers(name = self.provider_name ,
                                   long_name = 'Bureau of Economic Analysis',
@@ -58,17 +59,21 @@ class BEA(Fetcher):
                     excel_book = xlrd.open_workbook(file_contents = zipfile_.read(section)) 
                     for sheet_name in excel_book.sheet_names(): 
                         sheet = excel_book.sheet_by_name(sheet_name)
-                        if  sheet_name != 'Contents':
+                        
+                        if sheet_name != 'Contents':
+                            self.list_sheet.append(sheet)
                             datasetCode = sheet_name
-                            self.upsert_dataset(datasetCode, sheet)                    
+                            self.upsert_dataset(datasetCode) 
+                            
                 # else :
                 #ToDO: lip_PrevT3a, lip_PrevT3b, lip_PrevT3c          
                     
                         
-    def upsert_dataset(self, datasetCode, sheet):    
+    def upsert_dataset(self, datasetCode):    
         
         dataset = Datasets(self.provider_name,datasetCode,
                            fetcher=self)
+        sheet = self.list_sheet[-1]                   
         bea_data = BeaData(dataset,self.url, sheet)
         dataset.name = datasetCode
         dataset.doc_href = 'http://www.bea.gov/newsreleases/national/gdp/gdpnewsrelease.htm'
