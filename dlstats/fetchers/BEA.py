@@ -45,7 +45,7 @@ class BEA(Fetcher):
     def upsert_nipa(self):  
         for self.url in self.urls:
             #self.url = self.urls[url_key]
-            print(self.url)
+            #print(self.url)
             response = urllib.request.urlopen(self.url)
             zipfile_ = zipfile.ZipFile(io.BytesIO(response.read()))
             #excel_filenames = iter(zipfile_.namelist())
@@ -98,7 +98,8 @@ class BeaData():
         self.dataset_code = dataset.dataset_code
         self.dimension_list = dataset.dimension_list
         self.attribute_list = dataset.attribute_list
-        #print(dataset.name)
+        self.list_datasets = []
+        self.list_datasets.append(sheet)
         str = sheet.cell_value(2,0) #released Date
         info = []
         #retrieve frequency from url        
@@ -185,7 +186,8 @@ class BeaData():
         return(series)
 
     def upsert_all_datasets(self):
-        self.upsert_dataset(dataset_code)      
+        for dataset_code in self.list_datasets :
+            self.upsert_dataset(dataset_code)      
 
 if __name__ == "__main__":
     w = BEA()
