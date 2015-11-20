@@ -90,7 +90,12 @@ class BEA(Fetcher):
                             children = None,
                             fetcher=self )
         return document.update_database() 
-                
+        
+    def upsert_all_datasets(self):
+        for dataset_code in self.list_sheet :
+            self.upsert_dataset(dataset_code.name)     
+        
+        
 class BeaData():
     def __init__(self,dataset,url, sheet):
         self.sheet = sheet
@@ -98,8 +103,6 @@ class BeaData():
         self.dataset_code = dataset.dataset_code
         self.dimension_list = dataset.dimension_list
         self.attribute_list = dataset.attribute_list
-        self.list_datasets = []
-        self.list_datasets.append(sheet.name)
         str = sheet.cell_value(2,0) #released Date
         info = []
         #retrieve frequency from url        
@@ -185,9 +188,7 @@ class BeaData():
         series['attributes'] = {}
         return(series)
 
-    def upsert_all_datasets(self):
-        for dataset_code in self.list_datasets :
-            self.upsert_dataset(dataset_code)      
+      
 
 if __name__ == "__main__":
     w = BEA()
