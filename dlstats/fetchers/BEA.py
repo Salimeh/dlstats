@@ -99,7 +99,7 @@ class BeaData():
         self.dimension_list = dataset.dimension_list
         self.attribute_list = dataset.attribute_list
         self.list_datasets = []
-        self.list_datasets.append(sheet)
+        self.list_datasets.append(sheet.name)
         str = sheet.cell_value(2,0) #released Date
         info = []
         #retrieve frequency from url        
