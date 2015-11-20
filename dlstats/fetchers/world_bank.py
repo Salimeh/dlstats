@@ -46,6 +46,10 @@ class WorldBank(Fetcher):
         dataset.last_update = gem_data.releaseDate
         dataset.series.data_iterator = gem_data
         dataset.update_database()
+        
+    def upsert_all_datasets(self):
+        self.upsert_dataset('GEM')  
+
 
 class GemData:
     def __init__(self,dataset,url):
@@ -145,6 +149,8 @@ class GemData:
         self.sheets = iter([s for s in self.excel_book.sheets()
                             if s.name not in ['Sheet1','Sheet2','Sheet3','Sheet4',
                                               'Feuille1','Feuille2','Feuille3','Feuille4']])
+                                              
+                                            
 
 if __name__ == "__main__":
     import world_bank
