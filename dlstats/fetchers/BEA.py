@@ -9,14 +9,9 @@ from dlstats.fetchers._commons import Fetcher, Categories, Series, Datasets, Pro
 from dlstats import constants
 import urllib
 import xlrd
-import csv
-import codecs
 from datetime import datetime
 import pandas
-import pprint
 from collections import OrderedDict
-from re import match
-from time import sleep
 import zipfile
 import io
 
@@ -29,6 +24,7 @@ class BEA(Fetcher):
                                   region = 'USA',
                                   website='www.bea.gov/',
                                   fetcher=self)
+       
         #self.urls= {'National Data_GDP & Personal Income' :'http://www.bea.gov//national/nipaweb/GetCSV.asp?GetWhat=SS_Data/SectionAll_xls.zip&Section=11',
         #            'National Data_Fixed Assets': 'http://www.bea.gov//national/FA2004/GetCSV.asp?GetWhat=SS_Data/SectionAll_xls.zip&Section=11', 
          #           'Industry data_GDP by industry_Q': 'http://www.bea.gov//industry/iTables%20Static%20Files/AllTablesQTR.zip',
@@ -38,12 +34,12 @@ class BEA(Fetcher):
              #       'International investment position(IIP)': 'http://www.bea.gov/international/bp_web/startDownload.cfm?dlSelect=tables/XLSNEW/IIP-XLS.zip'}
          
         self.urls= ['http://www.bea.gov//national/nipaweb/GetCSV.asp?GetWhat=SS_Data/SectionAll_xls.zip&Section=11',
-                     'http://www.bea.gov//national/FA2004/GetCSV.asp?GetWhat=SS_Data/SectionAll_xls.zip&Section=11', 
-                    'http://www.bea.gov//industry/iTables%20Static%20Files/AllTablesQTR.zip',
-                     'http://www.bea.gov//industry/iTables%20Static%20Files/AllTables.zip',
-                     'http://www.bea.gov/international/bp_web/startDownload.cfm?dlSelect=tables/XLSNEW/ITA-XLS.zip',
-                     'http://www.bea.gov/international/bp_web/startDownload.cfm?dlSelect=tables/XLSNEW/IntlServ-XLS.zip',
-                     'http://www.bea.gov/international/bp_web/startDownload.cfm?dlSelect=tables/XLSNEW/IIP-XLS.zip']
+                     'http://www.bea.gov//national/FA2004/GetCSV.asp?GetWhat=SS_Data/SectionAll_xls.zip&Section=11'] 
+                    #'http://www.bea.gov//industry/iTables%20Static%20Files/AllTablesQTR.zip',
+                     #'http://www.bea.gov//industry/iTables%20Static%20Files/AllTables.zip',
+                    # 'http://www.bea.gov/international/bp_web/startDownload.cfm?dlSelect=tables/XLSNEW/ITA-XLS.zip',
+                     #'http://www.bea.gov/international/bp_web/startDownload.cfm?dlSelect=tables/XLSNEW/IntlServ-XLS.zip',
+                     #'http://www.bea.gov/international/bp_web/startDownload.cfm?dlSelect=tables/XLSNEW/IIP-XLS.zip']
                     
     def upsert_nipa(self):  
         for self.url in self.urls:
@@ -86,7 +82,7 @@ class BEA(Fetcher):
         document = Categories(provider = self.provider_name, 
                             name = 'BEA' , 
                             categoryCode ='BEA',
-                            children = [None],
+                            children = None,
                             fetcher=self )
         return document.update_database() 
                 
@@ -97,7 +93,7 @@ class BeaData():
         self.dataset_code = dataset.dataset_code
         self.dimension_list = dataset.dimension_list
         self.attribute_list = dataset.attribute_list
-        print(dataset.name)
+        #print(dataset.name)
         str = sheet.cell_value(2,0) #released Date
         info = []
         #retrieve frequency from url        
@@ -106,11 +102,16 @@ class BeaData():
         if  'AllTables.' in url : 
             self.frequency = 'A'
         #retrieve frequency from sheet name  
-        if 'Qtr' in sheet.name :
+        if 'Qtr' in self.sheet.name :
             self.frequency = 'Q' 
-        if 'Ann'  in sheet.name or 'Annual' in sheet.name:
+        if 'Ann'  in self.sheet.name or 'Annual' in self.sheet.name:
             self.frequency = 'A'
-        print( url)
+        if 'Month'  in self.sheet.name :
+            self.frequency = 'M'            
+            
+        #print(url)
+        #print(self.sheet.name)    
+        #print( self.frequency)
         if 'Section' in  url :
             release_datesheet = sheet.cell_value(4,0)[15:] 
         else :
@@ -158,8 +159,8 @@ class BeaData():
         #TO DO: Syncronize for all series
         series_name = row[1].value + self.frequency 
         series_key = 'BEA.' + self.sheet.col(0)[0].value + '; ' + row[1].value
-        print(row[2].value)
-        print(row[1].value)
+        #print(row[2].value)
+        #print(row[1].value)
         dimensions['concept'] = self.dimension_list.update_entry('concept',row[2].value,row[1].value)  
         dimensions['line'] = self.dimension_list.update_entry('line',str(row[0].value),str(row[0].value))
         for r in range(3, len(row)):
@@ -177,6 +178,9 @@ class BeaData():
         series['frequency'] = self.frequency
         series['attributes'] = {}
         return(series)
+
+    def upsert_all_datasets(self):
+        self.upsert_dataset(dataset_code)      
 
 if __name__ == "__main__":
     w = BEA()
