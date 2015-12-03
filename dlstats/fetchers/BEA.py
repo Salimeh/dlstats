@@ -34,8 +34,8 @@ class BEA(Fetcher):
             #        'International services': 'http://www.bea.gov/international/bp_web/startDownload.cfm?dlSelect=tables/XLSNEW/IntlServ-XLS.zip',
              #       'International investment position(IIP)': 'http://www.bea.gov/international/bp_web/startDownload.cfm?dlSelect=tables/XLSNEW/IIP-XLS.zip'}
          
-        self.urls= ['http://www.bea.gov//national/nipaweb/GetCSV.asp?GetWhat=SS_Data/SectionAll_xls.zip&Section=11',
-                     'http://www.bea.gov//national/FA2004/GetCSV.asp?GetWhat=SS_Data/SectionAll_xls.zip&Section=11'] 
+        self.urls= ['http://www.bea.gov//national/nipaweb/GetCSV.asp?GetWhat=SS_Data/SectionAll_xls.zip&Section=11']
+                    # 'http://www.bea.gov//national/FA2004/GetCSV.asp?GetWhat=SS_Data/SectionAll_xls.zip&Section=11'] 
                     #'http://www.bea.gov//industry/iTables%20Static%20Files/AllTablesQTR.zip',
                      #'http://www.bea.gov//industry/iTables%20Static%20Files/AllTables.zip',
                     # 'http://www.bea.gov/international/bp_web/startDownload.cfm?dlSelect=tables/XLSNEW/ITA-XLS.zip',
@@ -61,9 +61,12 @@ class BEA(Fetcher):
                         sheet = excel_book.sheet_by_name(sheet_name)
                         
                         if sheet_name != 'Contents':
-                            self.list_sheet.append(sheet)
-                            datasetCode = sheet_name
-                            self.upsert_dataset(datasetCode) 
+                            #ToDo: Considering Monthly data
+                            #eliminate Monthly temprerary because of different template
+                            if sheet_name.find('Month') < 0:
+                                self.list_sheet.append(sheet)
+                                datasetCode = sheet_name
+                                self.upsert_dataset(datasetCode) 
                             
                 # else :
                 #ToDO: lip_PrevT3a, lip_PrevT3b, lip_PrevT3c          
@@ -117,10 +120,7 @@ class BeaData():
             self.frequency = 'A'
         if 'Month'  in self.sheet.name :
             self.frequency = 'M'            
-            
-        #print(url)
-        #print(self.sheet.name)    
-        #print( self.frequency)
+
         if 'Section' in  url :
             release_datesheet = sheet.cell_value(4,0)[15:] 
         else :
@@ -142,19 +142,28 @@ class BeaData():
             if 'A1' in col_values_:
                 row_start = col_values_.index('A1')
             else :    
-                row_start = col_values_.index('1')         
-        self.row_range = iter(range(row_start, sheet.nrows))
-        if '' in sheet.col_values(1)[row_start:] :
-            row_info = sheet.col_values(1).index('',row_start,sheet.nrows)+1
-            if sheet.col_values(0)[row_info]:
-                for row_no in range(row_info, sheet.nrows) : 
-                    info.append(sheet.cell_value(row_no,0))
-
+                row_start = col_values_.index('1')
+        self.row_range_wo_info=sheet.nrows       
+        for tem in range(1,sheet.nrows):
+            if sheet.col(3)[-tem].value != '':
+                self.row_range_wo_info = sheet.nrows-tem
+                break
+        self.row_range = iter(range(row_start,self.row_range_wo_info+1))
+        
+        if self.row_range_wo_info != sheet.nrows :    
+            for ind_info in range(self.row_range_wo_info+2, sheet.nrows):
+                info.append(sheet.cell_value(ind_info,0))
    
     def __next__(self):
         row = self.sheet.row(next(self.row_range))
         if row is None:
             raise StopIteration()
+        if str(row[0].value)== '':
+            row = self.sheet.row(next(self.row_range))
+            if str(row[0].value)== '': 
+                row = self.sheet.row(next(self.row_range))
+                if str(row[0].value)== '': 
+                    row = self.sheet.row(next(self.row_range))
         series = self.build_series(row)
         if series is None:
             raise StopIteration()            
@@ -167,9 +176,7 @@ class BeaData():
         series_value = [] 
         #TO DO: Syncronize for all series
         series_name = row[1].value + self.frequency 
-        series_key = 'BEA.' + self.sheet.col(0)[0].value + '; ' + row[1].value
-        #print(row[2].value)
-        #print(row[1].value)
+        series_key =  str(row[0].value)
         dimensions['concept'] = self.dimension_list.update_entry('concept',row[2].value,row[1].value)  
         dimensions['line'] = self.dimension_list.update_entry('line',str(row[0].value),str(row[0].value))
         for r in range(3, len(row)):
