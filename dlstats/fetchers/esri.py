@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """
 Created on Fri Oct 16 10:59:20 2015
-
 @author: salimeh
 """
 
@@ -44,18 +43,23 @@ class Esri(Fetcher):
         links_ = [href_.values() for href_ in hrefs_]
         deflator_urls = ['http://www.esri.cao.go.jp' + links_[2*i][0][20:]  for i in range(4)]
         self.url_all = gdp_urls + deflator_urls
-        self.datasetCode_list = ['Nominal Gross Domestic Product (original series)',
-                'Annual Nominal GDP (fiscal year)',                
-                'Nominal Gross Domestic Product (seasonally adjusted series)',
-                'Annual Nominal GDP (calendar year)',
-                'Real Gross Domestic Product (original series)',
-                'Annual Real GDP (fiscal year)',
-                'Real Gross Domestic Product (seasonally adjusted series)',
-                'Annual Real GDP (calendar year)',
-                'Deflators (quarter:original series)',
-                'Deflators (quarter:seasonally adjusted series)' ,
-                'Deflators (fiscal year)',
-                'Deflators (calendar year)']
+        self.dataset_name_list = [ 'Nominal Gross Domestic Product (original series)',
+                                   'Annual Nominal GDP (fiscal year)',                
+                                   'Nominal Gross Domestic Product (seasonally adjusted series)',
+                                   'Annual Nominal GDP (calendar year)',
+                                   'Real Gross Domestic Product (original series)',
+                                   'Annual Real GDP (fiscal year)',
+                                   'Real Gross Domestic Product (seasonally adjusted series)',
+                                   'Annual Real GDP (calendar year)',
+                                   'Deflators (quarter:original series)',
+                                   'Deflators (quarter:seasonally adjusted series)' ,
+                                   'Deflators (fiscal year)',
+                                   'Deflators (calendar year)']
+        self.datasetCode_list = ['esri'+str(index+1) for index, s in enumerate(self.dataset_name_list)]
+        self.dataset_name = {'esri' +str(index+1): s for index, s in enumerate(self.dataset_name_list)}
+        print(self.datasetCode_list)
+        print(self.dataset_name)
+        
     def upsert_categories(self):
         document = Categories(provider = self.provider_name, 
                             name = 'esri', 
@@ -77,25 +81,26 @@ class Esri(Fetcher):
         dataset = Datasets(self.provider_name,dataset_code,
                            fetcher=self)
         sna_data = EsriData(dataset,url)
-        dataset.name = dataset_code
+        dataset.name = self.dataset_name[dataset_code]
         dataset.doc_href = 'http://www.esri.cao.go.jp/index-e.html'
         dataset.last_update = sna_data.releaseDate
         dataset.series.data_iterator = sna_data
         dataset.update_database()
 
+    def upsert_all_datasets(self):
+        self.upsert_categories()
+        self.esri_issue()
         
 class EsriData():
     def __init__(self,dataset,url):
+        self.url = url
         self.provider_name = dataset.provider_name
         self.dataset_code = dataset.dataset_code
         self.dimension_list = dataset.dimension_list
         self.attribute_list = dataset.attribute_list
-        self.panda_csv = pandas.read_csv(url)
-        response = urllib.request.urlopen(url)
-        releaseDate = response.info()['Last-Modified'] 
-        self.releaseDate = datetime.strptime(releaseDate, 
-                                                      "%a, %d %b %Y %H:%M:%S GMT")                                                  
- 
+        self.panda_csv = self.get_csv_data(url)
+        self.release_date = self.get_release_date()
+        self.column_range = iter(range(1, self.panda_csv.shape[1]))
         if self.panda_csv.iloc[:,0][6] == '4' :
             self.frequency = 'A'
             ind = -1 
@@ -106,8 +111,17 @@ class EsriData():
         start_date = self.panda_csv.iloc[:,0][6][:4]
         self.end_date = pandas.Period(end_date,freq = self.frequency).ordinal    
         self.start_date = pandas.Period(start_date,freq = self.frequency).ordinal
-        self.column_range = iter(range(1, len(self.panda_csv.iloc[5,:])))
-       #generating name of the series             
+    
+    def get_csv_data(self,url,**kwargs):
+        return pandas.read_csv(url,**kwargs)
+    
+    def get_release_date(self):
+        response = urllib.request.urlopen(self.url)
+        releaseDate = response.info()['Last-Modified'] 
+        return datetime.strptime(releaseDate,"%a, %d %b %Y %H:%M:%S GMT")                                                  
+        
+    def fix_series_names(self):
+        #generating name of the series             
         columns =self.panda_csv.columns
         for column_ind in range(columns.size):
             if str(self.panda_csv.iloc[:,column_ind][5]) != "nan":
@@ -134,7 +148,7 @@ class EsriData():
             self.currency = str(self.panda_csv.iloc[0,:][lent-2])
         else:
             self.currency = str(self.panda_csv.iloc[0,:][lent-1])
-        
+        return self.panda_csv.iloc[3,1:]
         
     def edit_seriesname(self,seriesname):   
          seriesname = seriesname.replace(' ','')  
@@ -190,6 +204,5 @@ class EsriData():
 if __name__ == "__main__":
     e = Esri()
     e.provider.update_database()
-    e.esri_issue()
+    e.upsert_all_datasets()
     e.upsert_categories()
-    
