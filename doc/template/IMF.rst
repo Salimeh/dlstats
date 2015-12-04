@@ -28,7 +28,7 @@ Data tree
 =========
 
 :Existence of a hierarchy of datasets on web site: No
-:How to recover the information: for WEO_http://www.imf.org/external/ns/cs.aspx?id=28 , For IFS we need to creat an account for Bulk download, http://data.imf.org/?sk=5DABAFF2-C5AD-4D27-A175-1253419C02D1
+:How to recover the information: for WEO: http://www.imf.org/external/ns/cs.aspx?id=28 , For IFS we need to creat an account for Bulk download, http://data.imf.org/?sk=5DABAFF2-C5AD-4D27-A175-1253419C02D1
 Datasets
 ========
 
@@ -51,19 +51,19 @@ Series
 :Series notes: No
 :missing values: No
 :date format: 
-:mixed frequencies in the same dataset: NO for WEO yes for IFS
+:mixed frequencies in the same dataset: NO for WEO, yes for IFS
 
 Updates
 =======
 
 :calendar of future updates: No
-:summary of previous upudates: WEO :http://www.imf.org/external/ns/cs.aspx?id=28, IFS No 
-:regular updates: WEO 2 times in the year, usually October and April the day is not fixed.
+:summary of previous upudates: WEO :http://www.imf.org/external/ns/cs.aspx?id=28, IFS: No 
+:regular updates: WEO: 2 times in the year, usually October and April the day is not fixed.
 :RSS flow:
-:best way to monitor updates: WEO checking the mentioned URL, IFS checking the date of the Zipped file 
+:best way to monitor updates: WEO: checking the mentioned URL, IFS: checking the date of the Zipped file 
 Special problems
 ================
-For IFS we have Time period column. The date is organized in the different way. We have to read all data once and organized it according to the date and after insert the series in Mongo. By now, we assumed same starting and ending date for all series but apparently it is not the case. In addition, the zip file is around 3 Gigabite, therefore the time issue might be important in reading IFS.
+Creating an account for bulk downloading of IFS is necessary. Also for IFS we have Time period column. The date is organized in the different way. We have to read all data once and organized it according to the date and after insert the series in Mongo. By now, we assumed same starting and ending date for all series but apparently it is not the case. In addition, the zip file is around 3 Gigabite, therefore the time issue might be important in reading IFS.
 
 Other remarks
 =============
