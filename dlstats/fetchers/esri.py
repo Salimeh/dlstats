@@ -57,8 +57,8 @@ class Esri(Fetcher):
                                    'Deflators (calendar year)']
         self.datasetCode_list = ['esri'+str(index+1) for index, s in enumerate(self.dataset_name_list)]
         self.dataset_name = {'esri' +str(index+1): s for index, s in enumerate(self.dataset_name_list)}
-        print(self.datasetCode_list)
-        print(self.dataset_name)
+        #print(self.datasetCode_list)
+        #print(self.dataset_name)
         
     def upsert_categories(self):
         document = Categories(provider = self.provider_name, 
@@ -102,6 +102,8 @@ class EsriData():
         self.release_date = self.get_release_date()
         self.column_range = iter(range(1, self.panda_csv.shape[1]))
         self.currency = ''
+        self.series_name = self.fix_series_names()
+        
         if self.panda_csv.iloc[6,0] == '4' :
             self.frequency = 'A'
             ind = -1 
@@ -149,7 +151,8 @@ class EsriData():
             self.currency = str(self.panda_csv.iloc[0,lent-2])
         else:
             self.currency = str(self.panda_csv.iloc[0,lent-1])
-        return self.panda_csv.iloc[3,1:]
+        series_name = self.panda_csv.iloc[3,1:]
+        return series_name
         
     def edit_seriesname(self,seriesname):   
          seriesname = seriesname.replace(' ','')  
@@ -181,8 +184,9 @@ class EsriData():
         series_value = []       
         series_name = str(column[3])+'_ ' + self.frequency +'_ ' +self.currency
         series_key = 'esri.' + str(column[3]) + '; ' + self.frequency
-       # print('**************')        
+        print('**************')        
         print(column[3])
+        
        # print('**************')
         dimensions['concept'] = self.dimension_list.update_entry('concept','',str(column[3]))
         #print(dimensions['concept'])
