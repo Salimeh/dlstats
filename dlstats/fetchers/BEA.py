@@ -148,14 +148,14 @@ class BeaData():
             if sheet.col(3)[-tem].value != '':
                 self.row_range_wo_info = sheet.nrows-tem
                 break
-        self.row_range = iter(range(row_start,self.row_range_wo_info+1))
-        
+        self.row_range = iter(range(row_start,self.row_range_wo_info+1))    
         if self.row_range_wo_info != sheet.nrows :    
             for ind_info in range(self.row_range_wo_info+2, sheet.nrows):
                 info.append(sheet.cell_value(ind_info,0))
    
     def __next__(self):
         row = self.sheet.row(next(self.row_range))
+        #print(self.row_range.__length_hint__() )
         if row is None:
             raise StopIteration()
         if str(row[0].value)== '':
@@ -165,7 +165,7 @@ class BeaData():
                 if str(row[0].value)== '': 
                     row = self.sheet.row(next(self.row_range))
         series = self.build_series(row)
-        if series is None:
+        if series is None:       
             raise StopIteration()            
         return(series) 
                                        
@@ -176,9 +176,10 @@ class BeaData():
         series_value = [] 
         #TO DO: Syncronize for all series
         series_name = row[1].value + self.frequency 
-        series_key =  str(row[0].value)
+        series_key = str(row[2].value)
         dimensions['concept'] = self.dimension_list.update_entry('concept',row[2].value,row[1].value)  
         dimensions['line'] = self.dimension_list.update_entry('line',str(row[0].value),str(row[0].value))
+        #print(dimensions)   
         for r in range(3, len(row)):
             series_value.append(str(row[r].value))  
         #release_dates = [self.release_date for v in series_value] 
@@ -193,6 +194,7 @@ class BeaData():
         series['dimensions'] = dimensions
         series['frequency'] = self.frequency
         series['attributes'] = {}
+        #print(series)
         return(series)
 
       
