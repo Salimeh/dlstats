@@ -34,8 +34,8 @@ class BEA(Fetcher):
             #        'International services': 'http://www.bea.gov/international/bp_web/startDownload.cfm?dlSelect=tables/XLSNEW/IntlServ-XLS.zip',
              #       'International investment position(IIP)': 'http://www.bea.gov/international/bp_web/startDownload.cfm?dlSelect=tables/XLSNEW/IIP-XLS.zip'}
          
-        self.urls= ['http://www.bea.gov//national/nipaweb/GetCSV.asp?GetWhat=SS_Data/SectionAll_xls.zip&Section=11']
-                    # 'http://www.bea.gov//national/FA2004/GetCSV.asp?GetWhat=SS_Data/SectionAll_xls.zip&Section=11'] 
+        self.urls= ['http://www.bea.gov//national/nipaweb/GetCSV.asp?GetWhat=SS_Data/SectionAll_xls.zip&Section=11',
+                    'http://www.bea.gov//national/FA2004/GetCSV.asp?GetWhat=SS_Data/SectionAll_xls.zip&Section=11'] 
                     #'http://www.bea.gov//industry/iTables%20Static%20Files/AllTablesQTR.zip',
                      #'http://www.bea.gov//industry/iTables%20Static%20Files/AllTables.zip',
                     # 'http://www.bea.gov/international/bp_web/startDownload.cfm?dlSelect=tables/XLSNEW/ITA-XLS.zip',
@@ -45,7 +45,6 @@ class BEA(Fetcher):
     def upsert_nipa(self):  
         for self.url in self.urls:
             #self.url = self.urls[url_key]
-            #print(self.url)
             response = urllib.request.urlopen(self.url)
             zipfile_ = zipfile.ZipFile(io.BytesIO(response.read()))
             #excel_filenames = iter(zipfile_.namelist())
@@ -54,7 +53,6 @@ class BEA(Fetcher):
             #if fname is None:
             #    raise StopIteration()
             for section in zipfile_.namelist():
-                #print(section)
                 if section !='Iip_PrevT3a.xls' and section !='Iip_PrevT3b.xls' and section !='Iip_PrevT3c.xls' :
                     excel_book = xlrd.open_workbook(file_contents = zipfile_.read(section)) 
                     for sheet_name in excel_book.sheet_names(): 
@@ -67,16 +65,16 @@ class BEA(Fetcher):
                                 self.list_sheet.append(sheet)
                                 datasetCode = sheet_name
                                 self.upsert_dataset(datasetCode) 
+                                
                             
                 # else :
                 #ToDO: lip_PrevT3a, lip_PrevT3b, lip_PrevT3c          
                     
                         
     def upsert_dataset(self, datasetCode):    
-        
         dataset = Datasets(self.provider_name,datasetCode,
                            fetcher=self)
-        sheet = self.list_sheet[-1]                   
+        sheet = self.list_sheet[-1]  
         bea_data = BeaData(dataset,self.url, sheet)
         dataset.name = datasetCode
         dataset.doc_href = 'http://www.bea.gov/newsreleases/national/gdp/gdpnewsrelease.htm'
@@ -84,7 +82,6 @@ class BEA(Fetcher):
         dataset.series.data_iterator = bea_data
         dataset.update_database()
         self.update_metas(datasetCode)
-
         
     def upsert_categories(self):
         document = Categories(provider = self.provider_name, 
@@ -155,17 +152,12 @@ class BeaData():
    
     def __next__(self):
         row = self.sheet.row(next(self.row_range))
-        #print(self.row_range.__length_hint__() )
         if row is None:
             raise StopIteration()
         if str(row[0].value)== '':
             row = self.sheet.row(next(self.row_range))
-            if str(row[0].value)== '': 
-                row = self.sheet.row(next(self.row_range))
-                if str(row[0].value)== '': 
-                    row = self.sheet.row(next(self.row_range))
         series = self.build_series(row)
-        if series is None:       
+        if series is None or self.row_range.__length_hint__()<0:       
             raise StopIteration()            
         return(series) 
                                        
@@ -175,14 +167,15 @@ class BeaData():
         series = {}
         series_value = [] 
         #TO DO: Syncronize for all series
+        if str(row[0].value)== '':
+            row = self.sheet.row(next(self.row_range))
         series_name = row[1].value + self.frequency 
+       
         series_key = str(row[2].value)
         dimensions['concept'] = self.dimension_list.update_entry('concept',row[2].value,row[1].value)  
-        dimensions['line'] = self.dimension_list.update_entry('line',str(row[0].value),str(row[0].value))
-        #print(dimensions)   
+        dimensions['line'] = self.dimension_list.update_entry('line',str(row[0].value),str(row[0].value)) 
         for r in range(3, len(row)):
-            series_value.append(str(row[r].value))  
-        #release_dates = [self.release_date for v in series_value] 
+            series_value.append(str(row[r].value))     
         series['values'] = series_value                
         series['provider'] = self.provider_name       
         series['datasetCode'] = self.dataset_code
@@ -194,11 +187,8 @@ class BeaData():
         series['dimensions'] = dimensions
         series['frequency'] = self.frequency
         series['attributes'] = {}
-        #print(series)
         return(series)
-
-      
-
+  
 if __name__ == "__main__":
     w = BEA()
     w.provider.update_database()
