@@ -21,82 +21,82 @@ logger = logging.getLogger(__name__)
 DATASETS = {
     'G19': {
         "name": "G.19 - Consumer Credit",
-        "doc_href": None,
+        "doc_href": 'http://www.federalreserve.gov/releases/G19/current/default.htm',
         'url': 'http://www.federalreserve.gov/datadownload/Output.aspx?rel=G19&filetype=zip',
     },
-    'Z17':{
+    'G17':{
          "name": "G.17 - Industrial Production and Capacity Utilization",
-         "doc_href": None,
+         "doc_href": 'http://www.federalreserve.gov/releases/G17/Current/default.htm',
          'url': 'http://www.federalreserve.gov/datadownload/Output.aspx?rel=G17&filetype=zip',
     },
     'H3':{
          "name": "H.3 - Aggregate Reserves of Depository Institution and the Monetary Base",
-         "doc_href": None,
+         "doc_href": 'http://www.federalreserve.gov/releases/H3/current/default.htm',
          'url': 'http://www.federalreserve.gov/datadownload/Output.aspx?rel=H3&filetype=zip',
     },    
     'H8':{
          "name": "H.8 - Assets and Liabilities of Commercial Banks in the U.S.",
-         "doc_href": None,
+         "doc_href": 'http://www.federalreserve.gov/releases/H8/current/',
          'url': 'http://www.federalreserve.gov/datadownload/Output.aspx?rel=H8&filetype=zip',
     },
     'E2':{
          "name": "E.2 - Survey of Terms of Business Lending",
-         "doc_href": None,
+         "doc_href": 'http://www.federalreserve.gov/releases/E2/Current/default.htm',
          'url': 'http://www.federalreserve.gov/datadownload/Output.aspx?rel=E2&filetype=zip',
     },
     'G20':{
          "name": "G.20 - Finance Companies",
-         "doc_href": None,
+         "doc_href": 'http://www.federalreserve.gov/releases/G20/current/',
          'url': 'http://www.federalreserve.gov/datadownload/Output.aspx?rel=G20&filetype=zip',
     },
     'G5/H10':{
          "name": "G.5 / H.10 - Foreign Exchange Rates",
-         "doc_href": None,
+         "doc_href": 'http://www.federalreserve.gov/releases/H10/current/default.htm',
          'url': 'http://www.federalreserve.gov/datadownload/Output.aspx?rel=H10&filetype=zip',
     },
     'Z1': {
         "name": "Z.1 - Financial Accounts of the United States",
-        "doc_href": None,
+        "doc_href": 'http://www.federalreserve.gov/releases/Z1/default.htm',
         'url': 'http://www.federalreserve.gov/datadownload/Output.aspx?rel=Z1&filetype=zip',
     },    
     'H15':{
          "name": "H.15 - Selected Interest Rates",
-         "doc_href": None,
+         "doc_href": 'http://www.federalreserve.gov/releases/H15/current/default.htm',
          'url': 'http://www.federalreserve.gov/datadownload/Output.aspx?rel=H15&filetype=zip',
     },
     'H41':{
          "name": "H.4.1 - Factors Affecting Reserve Balances",
-         "doc_href": None,
+         "doc_href": 'http://www.federalreserve.gov/releases/H41/Current/',
          'url': 'http://www.federalreserve.gov/datadownload/Output.aspx?rel=H41&filetype=zip',
     },
     'H6':{
          "name": "H.6 - Money Stock Measures",
-         "doc_href": None,
+         "doc_href": 'http://www.federalreserve.gov/releases/H6/current/default.htm',
          'url': 'http://www.federalreserve.gov/datadownload/Output.aspx?rel=H6&filetype=zip',
     },
     'SLOOS':{
          "name": "SLOOS - Senior Loan Officer Opinion Survey on Bank Lending Practices",
-         "doc_href": None,
+         "doc_href": 'http://www.federalreserve.gov/boarddocs/SnLoanSurvey/default.htm',
          'url': 'http://www.federalreserve.gov/datadownload/Output.aspx?rel=SLOOS&filetype=zip',
     },    
     'CP':{
          "name": "CP - Commercial Paper",
-         "doc_href": None,
+         "doc_href": 'http://www.federalreserve.gov/releases/CP/default.htm',
          'url': 'http://www.federalreserve.gov/datadownload/Output.aspx?rel=CP&filetype=zip',
     },    
     'PRATES':{
          "name": "PRATES - Policy Rates",
-         "doc_href": None,
+         "doc_href": 'http://www.federalreserve.gov/monetarypolicy/reqresbalances.htm',
          'url': 'http://www.federalreserve.gov/datadownload/Output.aspx?rel=PRATES&filetype=zip',
     },
     'FOR':{
          "name": "FOR - Household Debt Service and Financial Obligations Ratios",
-         "doc_href": None,
+         "doc_href": 'http://www.federalreserve.gov/releases/housedebt/default.htm',
          'url': 'http://www.federalreserve.gov/datadownload/Output.aspx?rel=FOR&filetype=zip',
     }, 
     'CHGDEL':{
          "name": "CHGDEL - Charge-off and Delinquency Rates",
-         "doc_href": None,
+         "doc_href": 'http://www.federalreserve.gov/releases/chargeoff/',
          'url': 'http://www.federalreserve.gov/datadownload/Output.aspx?rel=CHGDEL&filetype=zip ',
     },           
 }
