@@ -24,12 +24,259 @@ DATASETS = {
         "doc_href": None,
         'url': 'http://www.federalreserve.gov/datadownload/Output.aspx?rel=G19&filetype=zip',
     },
+    'Z17':{
+         "name": "G.17 - Industrial Production and Capacity Utilization",
+         "doc_href": None,
+         'url': 'http://www.federalreserve.gov/datadownload/Output.aspx?rel=G17&filetype=zip',
+    },
+    'H3':{
+         "name": "H.3 - Aggregate Reserves of Depository Institution and the Monetary Base",
+         "doc_href": None,
+         'url': 'http://www.federalreserve.gov/datadownload/Output.aspx?rel=H3&filetype=zip',
+    },    
+    'H8':{
+         "name": "H.8 - Assets and Liabilities of Commercial Banks in the U.S.",
+         "doc_href": None,
+         'url': 'http://www.federalreserve.gov/datadownload/Output.aspx?rel=H8&filetype=zip',
+    },
+    'E2':{
+         "name": "E.2 - Survey of Terms of Business Lending",
+         "doc_href": None,
+         'url': 'http://www.federalreserve.gov/datadownload/Output.aspx?rel=E2&filetype=zip',
+    },
+    'G20':{
+         "name": "G.20 - Finance Companies",
+         "doc_href": None,
+         'url': 'http://www.federalreserve.gov/datadownload/Output.aspx?rel=G20&filetype=zip',
+    },
+    'G5/H10':{
+         "name": "G.5 / H.10 - Foreign Exchange Rates",
+         "doc_href": None,
+         'url': 'http://www.federalreserve.gov/datadownload/Output.aspx?rel=H10&filetype=zip',
+    },
     'Z1': {
-        "name": "Flow of Funds Z.1",
+        "name": "Z.1 - Financial Accounts of the United States",
         "doc_href": None,
         'url': 'http://www.federalreserve.gov/datadownload/Output.aspx?rel=Z1&filetype=zip',
+    },    
+    'H15':{
+         "name": "H.15 - Selected Interest Rates",
+         "doc_href": None,
+         'url': 'http://www.federalreserve.gov/datadownload/Output.aspx?rel=H15&filetype=zip',
     },
+    'H41':{
+         "name": "H.4.1 - Factors Affecting Reserve Balances",
+         "doc_href": None,
+         'url': 'http://www.federalreserve.gov/datadownload/Output.aspx?rel=H41&filetype=zip',
+    },
+    'H6':{
+         "name": "H.6 - Money Stock Measures",
+         "doc_href": None,
+         'url': 'http://www.federalreserve.gov/datadownload/Output.aspx?rel=H6&filetype=zip',
+    },
+    'SLOOS':{
+         "name": "SLOOS - Senior Loan Officer Opinion Survey on Bank Lending Practices",
+         "doc_href": None,
+         'url': 'http://www.federalreserve.gov/datadownload/Output.aspx?rel=SLOOS&filetype=zip',
+    },    
+    'CP':{
+         "name": "CP - Commercial Paper",
+         "doc_href": None,
+         'url': 'http://www.federalreserve.gov/datadownload/Output.aspx?rel=CP&filetype=zip',
+    },    
+    'PRATES':{
+         "name": "PRATES - Policy Rates",
+         "doc_href": None,
+         'url': 'http://www.federalreserve.gov/datadownload/Output.aspx?rel=PRATES&filetype=zip',
+    },
+    'FOR':{
+         "name": "FOR - Household Debt Service and Financial Obligations Ratios",
+         "doc_href": None,
+         'url': 'http://www.federalreserve.gov/datadownload/Output.aspx?rel=FOR&filetype=zip',
+    }, 
+    'CHGDEL':{
+         "name": "CHGDEL - Charge-off and Delinquency Rates",
+         "doc_href": None,
+         'url': 'http://www.federalreserve.gov/datadownload/Output.aspx?rel=CHGDEL&filetype=zip ',
+    },           
 }
+CATEGORIES = [
+    {
+        "category_code": "PEI",
+        "name": "Principal Economic Indicators",
+        "position": 1,
+        "doc_href": None,
+        "datasets": [
+            {
+                "dataset_code": "G19",
+                "name": DATASETS["G19"]["name"], 
+                "doc_href": DATASETS["G19"]["doc_href"], 
+            },
+            {
+                "dataset_code": "G17",
+                "name": DATASETS["G17"]["name"], 
+                "doc_href": DATASETS["G17"]["doc_href"], 
+            },
+        ]
+    },
+    {
+        "category_code": "BAL",
+        "name": "Bank Assets & Liabilities",
+        "position": 2,
+        "doc_href": None,
+        "datasets": [
+            {
+                "dataset_code": "H3",
+                "name": DATASETS["H3"]["name"], 
+                "doc_href": DATASETS["H3"]["doc_href"], 
+            },
+            {
+                "dataset_code": "H8",
+                "name": DATASETS["H8"]["name"], 
+                "doc_href": DATASETS["H8"]["doc_href"], 
+            },
+            {
+                "dataset_code": "CHGDEL",
+                "name": DATASETS["CHGDEL"]["name"], 
+                "doc_href": DATASETS["CHGDEL"]["doc_href"], 
+            },              
+            {
+                "dataset_code": "SLOOS",
+                "name": DATASETS["SLOOS"]["name"], 
+                "doc_href": DATASETS["SLOOS"]["doc_href"], 
+            },  
+            {
+                "dataset_code": "E2",
+                "name": DATASETS["E2"]["name"], 
+                "doc_href": DATASETS["E2"]["doc_href"], 
+            },          
+        ]
+    },
+    {
+        "category_code": "BF",
+        "name": "Business Finance",
+        "position": 3,
+        "doc_href": None,
+        "datasets": [
+            {
+                "dataset_code": "CP",
+                "name": DATASETS["CP"]["name"], 
+                "doc_href": DATASETS["CP"]["doc_href"], 
+            },
+            {
+                "dataset_code": "G20",
+                "name": DATASETS["G20"]["name"], 
+                "doc_href": DATASETS["G20"]["doc_href"], 
+            },            
+        ]
+    },
+    {
+        "category_code": "ERID",
+        "name": "Exchange Rates and International Data",
+        "position": 4,
+        "doc_href": None,
+        "datasets": [
+            {
+                "dataset_code": "G5/H10",
+                "name": DATASETS["G5/H10"]["name"], 
+                "doc_href": DATASETS["G5/H10"]["doc_href"], 
+            },           
+        ]
+    },
+    {
+        "category_code": "FA",
+        "name": "Financial Accounts",
+        "position": 5,
+        "doc_href": None,
+        "datasets": [
+            {
+                "dataset_code": "Z1",
+                "name": DATASETS["Z1"]["name"], 
+                "doc_href": DATASETS["Z1"]["doc_href"], 
+            },
+        ]
+    },    
+    {
+        "category_code": "HF",
+        "name": "Household Finance",
+        "position": 6,
+        "doc_href": None,
+        "datasets": [
+            {
+                "dataset_code": "G19",
+                "name": DATASETS["G19"]["name"], 
+                "doc_href": DATASETS["G19"]["doc_href"], 
+            },  
+            {
+                "dataset_code": "G20",
+                "name": DATASETS["G20"]["name"], 
+                "doc_href": DATASETS["G20"]["doc_href"], 
+            }, 
+            {
+                "dataset_code": "FOR",
+                "name": DATASETS["FOR"]["name"], 
+                "doc_href": DATASETS["FOR"]["doc_href"], 
+            },             
+        ]
+    }, 
+    {
+        "category_code": "IA",
+        "name": "Industrial Activity",
+        "position": 7,
+        "doc_href": None,
+        "datasets": [
+            {
+                "dataset_code": "G17",
+                "name": DATASETS["G17"]["name"], 
+                "doc_href": DATASETS["G17"]["doc_href"], 
+            },           
+        ]
+    },   
+    {
+        "category_code": "IR",
+        "name": "Interest Rates",
+        "position": 8,
+        "doc_href": None,
+        "datasets": [
+            {
+                "dataset_code": "H15",
+                "name": DATASETS["H15"]["name"], 
+                "doc_href": DATASETS["H15"]["doc_href"], 
+            },  
+            {
+                "dataset_code": "PRATES",
+                "name": DATASETS["PRATES"]["name"], 
+                "doc_href": DATASETS["PRATES"]["doc_href"], 
+            },             
+        ]
+    }, 
+    {
+        "category_code": "MSRB",
+        "name": "Money Stock and Reserve Balances",
+        "position": 9,
+        "doc_href": None,
+        "datasets": [
+            {
+                "dataset_code": "H3",
+                "name": DATASETS["H3"]["name"], 
+                "doc_href": DATASETS["H3"]["doc_href"], 
+            },  
+            {
+                "dataset_code": "H41",
+                "name": DATASETS["H41"]["name"], 
+                "doc_href": DATASETS["H41"]["doc_href"], 
+            },   
+            {
+                "dataset_code": "H6",
+                "name": DATASETS["H6"]["name"], 
+                "doc_href": DATASETS["H6"]["doc_href"], 
+            },              
+        ]
+    }      
+    
+]
+
+
 
 def extract_zip_file(zipfilepath):
     zfile = zipfile.ZipFile(zipfilepath)
